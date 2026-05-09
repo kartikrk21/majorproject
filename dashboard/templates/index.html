@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeyRudra Analytics Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <div class="logo-area">
+                <div class="logo-icon">H</div>
+                <h1>HeyRudra <span class="accent">Analytics</span></h1>
+            </div>
+            <div class="status-indicator">
+                <div class="dot pulse"></div>
+                <span>System Online</span>
+            </div>
+        </header>
+
+        <main>
+            <!-- 1. Summary Cards -->
+            <section class="summary-cards">
+                <div class="card glass">
+                    <h3>Total Commands</h3>
+                    <div class="value" id="total-commands">--</div>
+                    <div class="subtitle">Executed via CLI</div>
+                </div>
+                <div class="card glass">
+                    <h3>Git Commits</h3>
+                    <div class="value" id="total-commits">--</div>
+                    <div class="subtitle">Tracked changes</div>
+                </div>
+                <div class="card glass">
+                    <h3>File Changes</h3>
+                    <div class="value" id="total-files">--</div>
+                    <div class="subtitle">Creations/Edits/Deletions</div>
+                </div>
+            </section>
+
+            <!-- 2. CPU & Memory Usage -->
+            <section class="system-metrics-row">
+                <div class="metric-card glass">
+                    <h3>CPU Usage</h3>
+                    <div class="gauge-wrapper">
+                        <div class="gauge-container">
+                            <canvas id="cpuChart"></canvas>
+                            <div class="gauge-value" id="cpu-value">--%</div>
+                        </div>
+                        <div class="metric-label">Real-time CPU load</div>
+                    </div>
+                </div>
+                <div class="metric-card glass">
+                    <h3>Memory Usage</h3>
+                    <div class="gauge-wrapper">
+                        <div class="gauge-container">
+                            <canvas id="memoryChart"></canvas>
+                            <div class="gauge-value" id="memory-value">--%</div>
+                        </div>
+                        <div class="metric-label">RAM consumption</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Latest 5 Commands -->
+            <section class="recent-activity glass">
+                <div class="section-header">
+                    <h3>Recent Commands</h3>
+                    <span class="badge">Latest 5</span>
+                </div>
+                <div class="table-container">
+                    <table id="activity-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Type</th>
+                                <th>Command</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activity-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 4. Activity Chart (shortened, at the end) -->
+            <section class="chart-section glass">
+                <div class="section-header">
+                    <h3>Activity Over Time</h3>
+                    <span class="badge">Daily Commands</span>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
