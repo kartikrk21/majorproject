@@ -22,19 +22,27 @@ def main():
     print(f"📁 Current folder: {cwd}")
     print()
 
-    cached = get_cache(prompt)
-    if cached:
-        command = cached.decode()
-        print("⚡ Using cached command:")
-        print(f"   {command}")
-        print()
-        print("🚀 Executing cached command...")
-        
-        if os.name == 'nt':
-            subprocess.run(["powershell", "-NoProfile", "-Command", command], cwd=cwd)
-        else:
-            subprocess.run(command, shell=True, cwd=cwd)
-        return
+    # Check if this prompt is dynamic (should always go through the full agent workflow)
+    prompt_lower = prompt.lower()
+    is_dynamic = any(keyword in prompt_lower for keyword in [
+        'git', 'commit', 'push', 'pull', 'status', 'branch', 'merge',
+        'dashboard', 'server', 'start', 'run', 'launch'
+    ])
+
+    if not is_dynamic:
+        cached = get_cache(prompt)
+        if cached:
+            command = cached.decode()
+            print("⚡ Using cached command:")
+            print(f"   {command}")
+            print()
+            print("🚀 Executing cached command...")
+            
+            if os.name == 'nt':
+                subprocess.run(["powershell", "-NoProfile", "-Command", command], cwd=cwd)
+            else:
+                subprocess.run(command, shell=True, cwd=cwd)
+            return
 
     # Run the agent workflow
     state = run_agent_flow(prompt, context)

@@ -55,15 +55,16 @@ class WorkflowState(TypedDict):
     safety_score: Optional[int]
     safety_warnings: Optional[list]
 
-def should_generate_commit_message(state: WorkflowState) -> str:
-    """Decide if we need to generate a commit message"""
+def should_generate_commit_msg_after_gen(state: WorkflowState) -> str:
+    """Decide if we need to generate a commit message after command generation"""
     task_type = state.get("task_type", "") or ""
     git_context = state.get("git_context", {}) or {}
     
     if task_type == "git" and git_context.get("needs_commit_msg", False):
         return "commit_msg"
-    else:
-        return "command_gen"
+    
+    # Otherwise, directly decide if we need to verify the command
+    return should_verify_command(state)
 
 def should_verify_command(state: WorkflowState) -> str:
     """Decide if we need to verify the command"""
@@ -88,25 +89,24 @@ def run_agent_flow(prompt: str, context: dict) -> WorkflowState:
     workflow.add_node("verifier", verifier_agent)
     workflow.add_node("executor", executor_agent)
     
-    # Define the flow
+    # Define the flow: planner always goes to command generation first
     workflow.set_entry_point("planner")
+    workflow.add_edge("planner", "command_gen")
     
-    # Conditional routing after planner
+    # After command generation, decide if we need to generate a commit message or verify/execute
     workflow.add_conditional_edges(
-        "planner",
-        should_generate_commit_message,
+        "command_gen",
+        should_generate_commit_msg_after_gen,
         {
             "commit_msg": "commit_msg",
-            "command_gen": "command_gen"
+            "verifier": "verifier",
+            "executor": "executor"
         }
     )
     
-    # After commit message generation, go to command generation
-    workflow.add_edge("commit_msg", "command_gen")
-    
-    # After command generation, conditional routing to verification
+    # After generating a commit message, decide if we need to verify/execute
     workflow.add_conditional_edges(
-        "command_gen",
+        "commit_msg",
         should_verify_command,
         {
             "verifier": "verifier",
