@@ -84,11 +84,12 @@ def _needs_commit_message(command, prompt):
     if "git commit" not in command.lower() and "commit" not in prompt.lower():
         return False
     
-    # Check if message is already provided
-    has_message = any(flag in command.lower() for flag in ['-m', '--message', '--file', '-F'])
+    # If the user explicitly provided a message in their prompt, we don't need to generate one.
+    # Otherwise, even if command_gen added a dummy message flag (-m "commit"), we still want to generate an intelligent message.
+    prompt_lower = prompt.lower()
+    has_explicit_message = any(indicator in prompt_lower for indicator in ['-m', '--message', 'with message', 'message:'])
     
-    # If no message flag, we need to generate one
-    return not has_message
+    return not has_explicit_message
 
 def _get_git_diff(cwd, staged=True):
     """Get git diff output"""
