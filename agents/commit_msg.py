@@ -26,9 +26,12 @@ def commit_msg_agent(state):
         # First, check if there are any staged changes
         staged_diff = _get_git_diff(cwd, staged=True)
         unstaged_diff = _get_git_diff(cwd, staged=False)
+        status_output = _get_git_status(cwd)
         
-        # If no staged changes, check unstaged changes
-        if not staged_diff.strip() and unstaged_diff.strip():
+        # If no staged changes, check unstaged or untracked changes
+        has_unstaged_or_untracked = unstaged_diff.strip() or status_output.strip()
+        
+        if not staged_diff.strip() and has_unstaged_or_untracked:
             print(" No staged changes found. Staging all changes...")
             # Stage all changes
             stage_result = subprocess.run(
@@ -39,6 +42,7 @@ def commit_msg_agent(state):
             )
             if stage_result.returncode == 0:
                 staged_diff = _get_git_diff(cwd, staged=True)
+                status_output = _get_git_status(cwd)
             else:
                 print(f"  Failed to stage changes: {stage_result.stderr}")
         
@@ -46,9 +50,6 @@ def commit_msg_agent(state):
             state["error"] = "No changes to commit"
             print(" No changes found to commit")
             return state
-        
-        # Get git status for additional context
-        status_output = _get_git_status(cwd)
         
         # Generate commit message based on diff
         commit_msg = _generate_intelligent_commit_message(staged_diff, status_output, prompt)
