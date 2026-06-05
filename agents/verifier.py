@@ -54,49 +54,48 @@ def _check_command_safety(command, cwd):
 
     # ── HARD BLOCK (no confirmation ever) ──────────────────────────────────
     hard_block = [
-        (r'\brm\s+-rf\s+/',           "Deleting root filesystem"),
-        (r'\brm\s+-rf\s+~',           "Deleting home directory"),
-        (r'\brm\s+-rf\s+\$HOME',      "Deleting home directory"),
-        (r'\brm\s+-rf\s+/home',       "Deleting /home"),
-        (r'\brm\s+-rf\s+/etc',        "Deleting /etc"),
-        (r'\brm\s+-rf\s+/usr',        "Deleting /usr"),
-        (r'\brm\s+-rf\s+/bin',        "Deleting /bin"),
-        (r'\brm\s+-rf\s+/boot',       "Deleting /boot"),
-        (r'\bsudo\s+rm\s+-rf\b',      "Root-level recursive deletion"),
-        (r'\bmkfs\b',                  "Formatting filesystem"),
-        (r'\bfdisk\b.*\b/dev/',        "Modifying disk partitions"),
-        (r'\bdd\s+if=/dev/zero',       "Overwriting disk"),
-        (r'\bformat\s+c:',             "Formatting system drive"),
-        (r'\bshutdown\b',              "System shutdown"),
-        (r'\breboot\b',                "System reboot"),
-        (r'\bhalt\b',                  "System halt"),
-        (r'\bpoweroff\b',              "System poweroff"),
-        (r'\bcurl\b.*\|\s*sh',         "Downloading and executing remote script"),
-        (r'\bwget\b.*\|\s*sh',         "Downloading and executing remote script"),
+        (r'\brm\s+-rf\s+/',       "Deleting root filesystem"),
+        (r'\brm\s+-rf\s+~',       "Deleting home directory"),
+        (r'\brm\s+-rf\s+\$HOME',  "Deleting home directory"),
+        (r'\brm\s+-rf\s+/home',   "Deleting /home"),
+        (r'\brm\s+-rf\s+/etc',    "Deleting /etc"),
+        (r'\brm\s+-rf\s+/usr',    "Deleting /usr"),
+        (r'\brm\s+-rf\s+/bin',    "Deleting /bin"),
+        (r'\brm\s+-rf\s+/boot',   "Deleting /boot"),
+        (r'\bsudo\s+rm\s+-rf\b',  "Root-level recursive deletion"),
+        (r'\bmkfs\b',             "Formatting filesystem"),
+        (r'\bfdisk\b.*\b/dev/',   "Modifying disk partitions"),
+        (r'\bdd\s+if=/dev/zero',  "Overwriting disk"),
+        (r'\bformat\s+c:',        "Formatting system drive"),
+        (r'\bshutdown\b',         "System shutdown"),
+        (r'\breboot\b',           "System reboot"),
+        (r'\bhalt\b',             "System halt"),
+        (r'\bpoweroff\b',         "System poweroff"),
+        (r'\bcurl\b.*\|\s*sh',    "Downloading and executing remote script"),
+        (r'\bwget\b.*\|\s*sh',    "Downloading and executing remote script"),
     ]
-
     for pattern, reason in hard_block:
         if re.search(pattern, cmd, re.IGNORECASE):
             return {"score": 0, "warnings": [reason], "reason": reason, "blocked": True}
 
     # ── SEMI-DANGEROUS (ask confirmation) ──────────────────────────────────
     risky = [
-        (r'\brm\s+-rf\b',   "Recursive deletion",          30),
-        (r'\brm\s+-r\b',    "Recursive deletion",          30),
-        (r'\bkillall\b',    "Killing all processes",       35),
-        (r'\bchmod\s+777',  "Overly permissive chmod",     40),
-        (r'\bsudo\b',       "Running as root",             20),
-        (r'\brm\b',         "File deletion",               10),
-        (r'\bchmod\b',      "Changing permissions",        10),
-        (r'\bchown\b',      "Changing ownership",          10),
+        (r'\brm\s+-rf\b',  "Recursive deletion",      30),
+        (r'\brm\s+-r\b',   "Recursive deletion",      30),
+        (r'\bkillall\b',   "Killing all processes",   35),
+        (r'\bchmod\s+777', "Overly permissive chmod", 40),
+        (r'\bsudo\b',      "Running as root",         20),
+        (r'\brm\b',        "File deletion",           10),
+        (r'\bchmod\b',     "Changing permissions",    10),
+        (r'\bchown\b',     "Changing ownership",      10),
     ]
-
     for pattern, description, penalty in risky:
         if re.search(pattern, cmd_lower):
             score -= penalty
             warnings.append(description)
 
-    return {"score": max(1, score), "warnings": warnings, "reason": warnings[0] if warnings else "", "blocked": False}
+    return {"score": max(1, score), "warnings": warnings,
+            "reason": warnings[0] if warnings else "", "blocked": False}
 
 
 def _check_syntax(command):
@@ -107,7 +106,8 @@ def _check_syntax(command):
             return {"valid": False, "error": "Unmatched double quote"}
         paren = 0
         for ch in command:
-            if ch == '(': paren += 1
+            if ch == '(':
+                paren += 1
             elif ch == ')':
                 paren -= 1
                 if paren < 0:
